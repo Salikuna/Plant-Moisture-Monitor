@@ -107,11 +107,10 @@ bool rfidLoop() {
     LastProfile   = Unkown_Profile;
     ProfileLoaded = false;
 
-    Serial.println("WARNING: Card UID not found in lookup table.");
-    Serial.println("To register this card, add its UID to PLANT_LOOKUP in rfid_plant_profiles.cpp");
+    Serial.println("WARNING: Card not found in lookup table.");
+    Serial.println("To register this specific card, please add its UID to PLANT_LOOKUP in rfid_plant_profiles.cpp");
   }
-
-  // Halt the card and stop encryption to allow the next scan
+  
   rfid.PICC_HaltA();
   rfid.PCD_StopCrypto1();
 
