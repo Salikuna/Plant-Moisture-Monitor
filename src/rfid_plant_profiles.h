@@ -12,8 +12,8 @@ const int RFID_RST_PIN = 9;
 //Constructing Plant Profiles for the project:
 struct PlantProfile{
     const char* name;
-    int moistureMin; //The miniumum threshold for the ideal moisture range (%)
     int moistureMax; //The maximum threshold for the ideal moisture range (%)
+    int moistureMin; //The miniumum threshold for the ideal moisture range (%)
     const char* lightNeeds; 
     const char* wateringFreq;
 };

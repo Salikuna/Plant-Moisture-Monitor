@@ -12,7 +12,7 @@ static const LookupEntry Plant_Lookup[] ={
     "A3:1F:BB:04",  // UID from Card #1
     {
       "Monstera",
-      50, 70,
+      80, 50,
       "Bright indirect light",
       "Every 7–10 days"
     }
@@ -21,7 +21,7 @@ static const LookupEntry Plant_Lookup[] ={
     "B7:2C:4D:19",  // UID from Card #2
     {
       "Succulent",
-      10, 30,
+      30, 15,
       "Full sun or bright direct light",
       "Every 14–21 days"
     }
@@ -32,7 +32,7 @@ static const int Lookup_Size = sizeof(Plant_Lookup)/sizeof(Plant_Lookup[0]);
 
 const PlantProfile Unknown_Profile = {
     "Unknown Plant",
-    0, 100, 
+    100, 0, 
     "Unknown", 
     "Unknown"
 };
