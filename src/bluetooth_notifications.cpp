@@ -1,5 +1,5 @@
 #include <BluetoothSerial.h>
-#include "bluetooth_notifications.h"
+#include "bluetooth.h"
 
 BluetoothSerial SerialBT;
 
