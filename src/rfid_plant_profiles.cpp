@@ -9,7 +9,7 @@ struct LookupEntry {
 
 static const LookupEntry Plant_Lookup[] ={
     {
-    "A3:1F:BB:04",  // <-- REPLACE with real UID from card 1
+    "A3:1F:BB:04",  // UID from Card #1
     {
       "Monstera",
       50, 70,
@@ -18,7 +18,7 @@ static const LookupEntry Plant_Lookup[] ={
     }
   },
   {
-    "B7:2C:4D:19",  // <-- REPLACE with real UID from card 2
+    "B7:2C:4D:19",  // UID from Card #2
     {
       "Succulent",
       10, 30,
@@ -27,7 +27,7 @@ static const LookupEntry Plant_Lookup[] ={
     }
   },
   {
-    "C1:88:A2:F3",  // <-- REPLACE with real UID from card 3
+    "C1:88:A2:F3",  // UID from Card #3
     {
       "Peace Lily",
       60, 80,
@@ -36,7 +36,7 @@ static const LookupEntry Plant_Lookup[] ={
     }
   },
   {
-    "D4:55:E6:7A",  // <-- REPLACE with real UID from card 4
+    "D4:55:E6:7A",  // UID from Card #4
     {
       "Cactus",
       5, 20,
@@ -45,7 +45,7 @@ static const LookupEntry Plant_Lookup[] ={
     }
   },
   {
-    "E9:3B:C7:02",  // <-- REPLACE with real UID from card 5
+    "E9:3B:C7:02",  // UID from Card #5
     {
       "Pothos",
       40, 60,
