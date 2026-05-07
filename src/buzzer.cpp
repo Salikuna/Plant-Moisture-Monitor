@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "buzzer.h"
 
 //Pin Definition
 const int BUZZER_PIN = 26;  // GPIO pin that buzzer is wired to 
