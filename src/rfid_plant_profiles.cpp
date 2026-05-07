@@ -104,13 +104,13 @@ bool rfidLoop() {
     Serial.print("Watering schedule: "); Serial.println(LastProfile.wateringFreq);
     Serial.println("---------------------------");
   } else {
-    LastProfile   = Unkown_Profile;
+    LastProfile   = Unknown_Profile;
     ProfileLoaded = false;
 
     Serial.println("WARNING: Card not found in lookup table.");
     Serial.println("To register this specific card, please add its UID to PLANT_LOOKUP in rfid_plant_profiles.cpp");
   }
-  
+
   rfid.PICC_HaltA();
   rfid.PCD_StopCrypto1();
 
