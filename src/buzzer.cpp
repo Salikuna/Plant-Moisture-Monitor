@@ -4,14 +4,14 @@
 const int BUZZER_PIN = 26;  // GPIO pin that buzzer is wired to 
 
 //Timing
-const unsigned long BEEP_INTERVAL = 3600000UL;  // 1 hour in milliseconds (3,600,000 ms)
-const int BEEP_DURATION_MS = 500;               // Each beep lasts 500ms
-const int NUM_BEEPS = 3;                         // 3 quick beeps per alert sequence
-const int BEEP_GAP_MS = 200;                     // Gap between beeps in a sequence
+const unsigned long BEEP_INTERVAL = 3600000UL;  
+const int BEEP_DURATION_MS = 500;               
+const int NUM_BEEPS = 3;                        
+const int BEEP_GAP_MS = 200;                  
 
-// --- STATE TRACKING ---
-unsigned long lastBuzzerTime = 0;     // Tracks when the last beep sequence fired
-bool buzzerArmed = false;             // True when plant is in dry (red) zone
+//State Tracking
+unsigned long lastBuzzerTime = 0;  // Tracks when the last beep sequence fired
+bool buzzerArmed = false;          // True when plant is in dry (red) zone
 
 // Call this ONCE in setup()
 void setupBuzzer() {
@@ -32,20 +32,18 @@ void playAlertBeeps() {
 }
 
 // Call this every loop() iteration.
-// Pass in the current moisture band from Sally's code:
-//   0 = RED (critically dry)   <-- buzzer activates
+// Passing the moisture band
+//   0 = RED (critically dry) : Buzzer Starts
 //   1 = YELLOW (getting dry)
-//   2 = GREEN (healthy)        <-- buzzer disarms
+//   2 = GREEN (healthy)      : Buzzer Stops
 //   3 = BLUE (overwatered)
 void updateBuzzer(int moistureBand) {
-
   if (moistureBand == 0) {
     // Plant is DRY — arm the buzzer if not already armed
     if (!buzzerArmed) {
       buzzerArmed = true;
       lastBuzzerTime = millis() - BEEP_INTERVAL; // Fire immediately on first entry
     }
-
     // Beep every hour while still in red zone
     unsigned long now = millis();
     if (now - lastBuzzerTime >= BEEP_INTERVAL) {
