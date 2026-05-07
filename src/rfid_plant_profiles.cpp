@@ -25,33 +25,6 @@ static const LookupEntry Plant_Lookup[] ={
       "Full sun or bright direct light",
       "Every 14–21 days"
     }
-  },
-  {
-    "C1:88:A2:F3",  // UID from Card #3
-    {
-      "Peace Lily",
-      60, 80,
-      "Low to medium indirect light",
-      "Every 5–7 days"
-    }
-  },
-  {
-    "D4:55:E6:7A",  // UID from Card #4
-    {
-      "Cactus",
-      5, 20,
-      "Full sun",
-      "Every 21–30 days"
-    }
-  },
-  {
-    "E9:3B:C7:02",  // UID from Card #5
-    {
-      "Pothos",
-      40, 60,
-      "Low to bright indirect light",
-      "Every 7–10 days"
-    }
   }
 };
 
