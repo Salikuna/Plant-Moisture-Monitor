@@ -30,6 +30,10 @@ int wetValue = 1200;
 const unsigned long READ_INTERVAL = 2000;
 unsigned long lastReadTime = 0;
 
+bool redAlertActive = false;
+unsigned long lastRedAlertTime = 0;
+const unsigned long RED_ALERT_INTERVAL = 30UL * 60UL * 1000UL;
+
 // Function declarations
 int moistureToPercent(int rawValue);
 int readMoisturePercent();
@@ -124,7 +128,16 @@ void showMoistureStatus(int moisturePercent) {
     setRingColor(255, 0, 0);
     Serial.println("Status: RED - Plant needs water urgently.");
 
-    sendRedZoneAlert();
+    unsigned long currentTime = millis();
+    if (!redAlertActive) {
+      sendRedZoneAlert();
+      redAlertActive = true;
+      lastRedAlertTime = currentTime;
+    } else if (currentTime - lastRedAlertTime >= RED_ALERT_INTERVAL) {
+      sendRedZoneAlert();
+      lastRedAlertTime = currentTime;
+    }
+
     updateScreen(moisturePercent, "Thirsty :(", "Water me now!");
   } 
   else if (moisturePercent <= 50) {
@@ -152,6 +165,10 @@ void showMoistureStatus(int moisturePercent) {
     updateScreen(moisturePercent, "Too wet!", "Let me dry out");
   }
 
+  if (moisturePercent > 25) {
+    redAlertActive = false;
+  }
+  
   // Buzzer beeps only when moistureBand is 0 / red zone
   updateBuzzer(moistureBand);
 }
