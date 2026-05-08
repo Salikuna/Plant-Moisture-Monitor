@@ -4,5 +4,6 @@
 void beginBluetooth();
 void sendRedZoneAlert();
 void sendStatusUpdate(int moisturePercent, unsigned long currentTime);
+void sendStatusChangeAlert(int moistureBand, int moisturePercent);
 
 #endif
