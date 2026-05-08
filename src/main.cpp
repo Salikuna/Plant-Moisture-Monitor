@@ -43,7 +43,27 @@ int moistureToPercent(int rawValue) {
   percent = constrain(percent, 0, 100);
   return percent;
 }
+void updateScreen(int moisturePercent, String line1, String line2) {
+  display.clearDisplay();
 
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.println(line1);
+
+  display.setTextSize(1);
+  display.setCursor(0, 22);
+  display.println(line2);
+
+  display.drawLine(0, 33, 128, 33, WHITE);
+
+  display.setTextSize(2);
+  display.setCursor(0, 38);
+  display.print(moisturePercent);
+  display.println("% water");
+
+  display.display();
+}
 void showMoistureStatus(int moisturePercent) {
   turnOffAllLEDs();
   if (moisturePercent <= 25) {
@@ -75,27 +95,7 @@ void showMoistureStatus(int moisturePercent) {
 }
 // function for the screen's setup
 
-void updateScreen(int moisturePercent, String line1, String line2) {
-  display.clearDisplay();
 
-  display.setTextSize(2);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 0);
-  display.println(line1);
-
-  display.setTextSize(1);
-  display.setCursor(0, 22);
-  display.println(line2);
-
-  display.drawLine(0, 33, 128, 33, WHITE);
-
-  display.setTextSize(2);
-  display.setCursor(0, 38);
-  display.print(moisturePercent);
-  display.println("% water");
-
-  display.display();
-}
 //main setup
 void setup() {
   Serial.begin(115200);
