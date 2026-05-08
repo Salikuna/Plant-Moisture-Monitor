@@ -13,8 +13,8 @@
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 // Soil moisture sensor analog pin
-// On the Maker Board, this corresponds to 36 / A18.
-const int MOISTURE_SENSOR_PIN = 36;
+// On the Maker Board, this corresponds to 32 / A4.
+const int MOISTURE_SENSOR_PIN = 32;
 
 // NeoPixel ring setup
 const int NEOPIXEL_PIN = 25;   // Maker Board NeoPixel connector
@@ -22,7 +22,7 @@ const int NUM_PIXELS = 16;     // Change if your ring has a different number of 
 Adafruit_NeoPixel pixels(NUM_PIXELS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
 // Calibration values
-int dryValue = 3500;
+int dryValue = 2348;
 int wetValue = 1200;
 
 // Timing
@@ -92,7 +92,15 @@ void loop() {
 }
 
 int readMoisturePercent() {
-  int rawValue = analogRead(MOISTURE_SENSOR_PIN);
+  long total = 0;
+  const int samples = 10;
+
+  for (int i = 0; i < samples; i++) {
+    total += analogRead(MOISTURE_SENSOR_PIN);
+    delay(10);
+  }
+
+  int rawValue = total / samples;
 
   Serial.print("Raw moisture value: ");
   Serial.println(rawValue);
