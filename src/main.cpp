@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "bluetooth.h"
 
 //Set-up for the maker board
 
@@ -43,6 +44,8 @@ void showMoistureStatus(int moisturePercent) {
   if (moisturePercent <= 25) {
     digitalWrite(RED_LED_PIN, HIGH);
     Serial.println("Status: RED - Plant needs water urgently.");
+
+    sendRedZoneAlert();
   } 
   else if (moisturePercent <= 50) {
     digitalWrite(YELLOW_LED_PIN, HIGH);
@@ -69,6 +72,8 @@ void setup() {
 
   turnOffAllLEDs();
 
+  beginBluetooth();
+
   Serial.println("Smart Plant Monitor started.");
 }
 
@@ -80,6 +85,8 @@ void loop() {
 
     int rawMoisture = analogRead(MOISTURE_SENSOR_PIN);
     int moisturePercent = moistureToPercent(rawMoisture);
+
+    sendStatusUpdate(moisturePercent, currentTime);
 
     Serial.print("Raw moisture value: ");
     Serial.println(rawMoisture);
