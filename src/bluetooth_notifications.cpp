@@ -38,3 +38,28 @@ void sendStatusUpdate(int moisturePercent, unsigned long currentTime) {
     }
     wasConnected = isConnected;
 }
+
+void sendStatusChangeAlert(int moistureBand, int moisturePercent) {
+  if (!SerialBT.hasClient()) {
+    return;
+  }
+
+  SerialBT.print("Plant status changed: ");
+
+  if (moistureBand == 0) {
+    SerialBT.print("RED - Plant needs water urgently. ");
+  }
+  else if (moistureBand == 1) {
+    SerialBT.print("YELLOW - Plant needs water soon. ");
+  }
+  else if (moistureBand == 2) {
+    SerialBT.print("GREEN - Plant has enough water. ");
+  }
+  else if (moistureBand == 3) {
+    SerialBT.print("BLUE - Plant has too much water. ");
+  }
+
+  SerialBT.print("Moisture: ");
+  SerialBT.print(moisturePercent);
+  SerialBT.println("%");
+}
