@@ -1,5 +1,10 @@
 #include <Arduino.h>
-
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 //Set-up for the maker board
 
 // Soil moisture sensor analog pin.
@@ -43,21 +48,51 @@ void showMoistureStatus(int moisturePercent) {
   if (moisturePercent <= 25) {
     digitalWrite(RED_LED_PIN, HIGH);
     Serial.println("Status: RED - Plant needs water urgently.");
+    updateScreen(moisturePercent, "Thirsty :(", "Water me now!"); // ADD THIS
+
   } 
   else if (moisturePercent <= 50) {
     digitalWrite(YELLOW_LED_PIN, HIGH);
     Serial.println("Status: YELLOW - Plant needs water soon.");
+    updateScreen(moisturePercent, "Getting dry", "Water me soon!"); // ADD THIS
+
   } 
   else if (moisturePercent <= 80) {
     digitalWrite(GREEN_LED_PIN, HIGH);
     Serial.println("Status: GREEN - Plant has enough water.");
+    updateScreen(moisturePercent, "Healthy! :)", "All good!"); // ADD THIS
+
   } 
   else {
     digitalWrite(BLUE_LED_PIN, HIGH);
     Serial.println("Status: BLUE - Plant has too much water.");
+     updateScreen(moisturePercent, "Too wet!", "Let me dry out"); // ADD THIS
+
   }
 }
+// function for the screen's setup
 
+void updateScreen(int moisturePercent, String line1, String line2) {
+  display.clearDisplay();
+
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.println(line1);
+
+  display.setTextSize(1);
+  display.setCursor(0, 22);
+  display.println(line2);
+
+  display.drawLine(0, 33, 128, 33, WHITE);
+
+  display.setTextSize(2);
+  display.setCursor(0, 38);
+  display.print(moisturePercent);
+  display.println("% water");
+
+  display.display();
+}
 //main setup
 void setup() {
   Serial.begin(115200);
@@ -68,7 +103,22 @@ void setup() {
   pinMode(BLUE_LED_PIN, OUTPUT);
 
   turnOffAllLEDs();
+// Start screen
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println("Screen not found!");
+    while (true);
+  }
 
+  // Welcome message
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setCursor(10, 10);
+  display.println("Smart");
+  display.setCursor(10, 35);
+  display.println("Plant :)");
+  display.display();
+  delay(2000);
   Serial.println("Smart Plant Monitor started.");
 }
 
