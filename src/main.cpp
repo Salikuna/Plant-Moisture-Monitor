@@ -23,6 +23,11 @@ int wetValue = 1200;
 const unsigned long READ_INTERVAL = 2000;
 unsigned long lastReadTime = 0;
 
+// Red alert timing
+bool inRedZone = false;
+unsigned long lastRedAlertTime = 0;
+const unsigned long RED_ALERT_INTERVAL = 30UL * 60UL * 1000UL;
+
 //helper functions
 void turnOffAllLEDs() {
   digitalWrite(RED_LED_PIN, LOW);
@@ -44,9 +49,19 @@ void showMoistureStatus(int moisturePercent) {
   if (moisturePercent <= 25) {
     digitalWrite(RED_LED_PIN, HIGH);
     Serial.println("Status: RED - Plant needs water urgently.");
+    
+    unsigned long currentTime = millis();
 
-    sendRedZoneAlert();
+    if (!inRedZone) {
+      sendRedZoneAlert();
+      inRedZone = true;
+      lastRedAlertTime = currentTime;
+    } else if (currentTime - lastRedAlertTime >= RED_ALERT_INTERVAL) {
+      sendRedZoneAlert();
+      lastRedAlertTime = currentTime;
+    }
   } 
+
   else if (moisturePercent <= 50) {
     digitalWrite(YELLOW_LED_PIN, HIGH);
     Serial.println("Status: YELLOW - Plant needs water soon.");
