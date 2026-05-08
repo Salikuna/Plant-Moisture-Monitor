@@ -1,117 +1,60 @@
 #include <Arduino.h>
 #include "bluetooth.h"
+#include "buzzer.h"
 
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <Adafruit_NeoPixel.h>
+
+// OLED screen setup
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
-//Set-up for the maker board
-// Soil moisture sensor analog pin.
+
+// Soil moisture sensor analog pin
 // On the Maker Board, this corresponds to 36 / A18.
 const int MOISTURE_SENSOR_PIN = 36;
 
-// LED pins connected through resistors.
-// These pins are on the Maker Board side header.
-const int RED_LED_PIN = 13;      // A14
-const int YELLOW_LED_PIN = 14;   // A16
-const int GREEN_LED_PIN = 27;    // A17
-const int BLUE_LED_PIN = 32;     // A4
+// NeoPixel ring setup
+const int NEOPIXEL_PIN = 25;   // Maker Board NeoPixel connector
+const int NUM_PIXELS = 16;     // Change if your ring has a different number of LEDs
+Adafruit_NeoPixel pixels(NUM_PIXELS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
-//calibration values
+// Calibration values
 int dryValue = 3500;
 int wetValue = 1200;
 
-//timing
-//sensor will be read every 2 seconds
+// Timing
+// Sensor will be read every 2 seconds
 const unsigned long READ_INTERVAL = 2000;
 unsigned long lastReadTime = 0;
 
-//helper functions
-void turnOffAllLEDs() {
-  digitalWrite(RED_LED_PIN, LOW);
-  digitalWrite(YELLOW_LED_PIN, LOW);
-  digitalWrite(GREEN_LED_PIN, LOW);
-  digitalWrite(BLUE_LED_PIN, LOW);
-}
+// Function declarations
+int moistureToPercent(int rawValue);
+int readMoisturePercent();
+void showMoistureStatus(int moisturePercent);
+void setRingColor(uint8_t red, uint8_t green, uint8_t blue);
+void updateScreen(int moisturePercent, String line1, String line2);
 
-int moistureToPercent(int rawValue) {
-  // Convert the raw sensor value into a percentage. dryValue maps to 0%. wetValue maps to 100%.
-  int percent = map(rawValue, dryValue, wetValue, 0, 100);
-  // result kept between 0 and 100.
-  percent = constrain(percent, 0, 100);
-  return percent;
-}
-void updateScreen(int moisturePercent, String line1, String line2) {
-  display.clearDisplay();
-
-  display.setTextSize(2);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 0);
-  display.println(line1);
-
-  display.setTextSize(1);
-  display.setCursor(0, 22);
-  display.println(line2);
-
-  display.drawLine(0, 33, 128, 33, WHITE);
-
-  display.setTextSize(2);
-  display.setCursor(0, 38);
-  display.print(moisturePercent);
-  display.println("% water");
-
-  display.display();
-}
-void showMoistureStatus(int moisturePercent) {
-  turnOffAllLEDs();
-  if (moisturePercent <= 25) {
-    digitalWrite(RED_LED_PIN, HIGH);
-    Serial.println("Status: RED - Plant needs water urgently.");
-
-    sendRedZoneAlert();
-    updateScreen(moisturePercent, "Thirsty :(", "Water me now!"); // ADD THIS
-
-  } 
-  else if (moisturePercent <= 50) {
-    digitalWrite(YELLOW_LED_PIN, HIGH);
-    Serial.println("Status: YELLOW - Plant needs water soon.");
-    updateScreen(moisturePercent, "Getting dry", "Water me soon!"); // ADD THIS
-
-  } 
-  else if (moisturePercent <= 80) {
-    digitalWrite(GREEN_LED_PIN, HIGH);
-    Serial.println("Status: GREEN - Plant has enough water.");
-    updateScreen(moisturePercent, "Healthy! :)", "All good!"); // ADD THIS
-
-  } 
-  else {
-    digitalWrite(BLUE_LED_PIN, HIGH);
-    Serial.println("Status: BLUE - Plant has too much water.");
-     updateScreen(moisturePercent, "Too wet!", "Let me dry out"); // ADD THIS
-
-  }
-}
-// function for the screen's setup
-
-
-//main setup
 void setup() {
   Serial.begin(115200);
 
-  pinMode(RED_LED_PIN, OUTPUT);
-  pinMode(YELLOW_LED_PIN, OUTPUT);
-  pinMode(GREEN_LED_PIN, OUTPUT);
-  pinMode(BLUE_LED_PIN, OUTPUT);
+  // Start buzzer
+  setupBuzzer();
 
-  turnOffAllLEDs();
-// Start screen
+  // Start NeoPixel ring
+  pixels.begin();
+  pixels.clear();
+  pixels.show();
+
+  // Start OLED screen
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println("Screen not found!");
     while (true);
   }
 
+  // Start Bluetooth
   beginBluetooth();
 
   // Welcome message
@@ -123,7 +66,9 @@ void setup() {
   display.setCursor(10, 35);
   display.println("Plant :)");
   display.display();
+
   delay(2000);
+
   Serial.println("Smart Plant Monitor started.");
 }
 
@@ -133,13 +78,7 @@ void loop() {
   if (currentTime - lastReadTime >= READ_INTERVAL) {
     lastReadTime = currentTime;
 
-    int rawMoisture = analogRead(MOISTURE_SENSOR_PIN);
-    int moisturePercent = moistureToPercent(rawMoisture);
-
-    sendStatusUpdate(moisturePercent, currentTime);
-
-    Serial.print("Raw moisture value: ");
-    Serial.println(rawMoisture);
+    int moisturePercent = readMoisturePercent();
 
     Serial.print("Moisture percentage: ");
     Serial.print(moisturePercent);
@@ -147,8 +86,96 @@ void loop() {
 
     showMoistureStatus(moisturePercent);
 
-    Serial.println("----------------------");
+    // Faith's Bluetooth helper sends connection message and timed updates
+    sendStatusUpdate(moisturePercent, currentTime);
   }
+}
+
+int readMoisturePercent() {
+  int rawValue = analogRead(MOISTURE_SENSOR_PIN);
+
+  Serial.print("Raw moisture value: ");
+  Serial.println(rawValue);
+
+  return moistureToPercent(rawValue);
+}
+
+int moistureToPercent(int rawValue) {
+  int moisturePercent = map(rawValue, dryValue, wetValue, 0, 100);
+  moisturePercent = constrain(moisturePercent, 0, 100);
+
+  return moisturePercent;
+}
+
+void showMoistureStatus(int moisturePercent) {
+  int moistureBand;
+
+  if (moisturePercent <= 25) {
+    moistureBand = 0; // RED - critically dry
+
+    setRingColor(255, 0, 0);
+    Serial.println("Status: RED - Plant needs water urgently.");
+
+    sendRedZoneAlert();
+    updateScreen(moisturePercent, "Thirsty :(", "Water me now!");
+  } 
+  else if (moisturePercent <= 50) {
+    moistureBand = 1; // YELLOW - getting dry
+
+    setRingColor(255, 180, 0);
+    Serial.println("Status: YELLOW - Plant needs water soon.");
+
+    updateScreen(moisturePercent, "Getting dry", "Water me soon!");
+  } 
+  else if (moisturePercent <= 80) {
+    moistureBand = 2; // GREEN - healthy
+
+    setRingColor(0, 255, 0);
+    Serial.println("Status: GREEN - Plant has enough water.");
+
+    updateScreen(moisturePercent, "I feel", "refreshed");
+  } 
+  else {
+    moistureBand = 3; // BLUE - overwatered
+
+    setRingColor(0, 0, 255);
+    Serial.println("Status: BLUE - Plant has too much water.");
+
+    updateScreen(moisturePercent, "Too wet!", "Let me dry out");
+  }
+
+  // Buzzer beeps only when moistureBand is 0 / red zone
+  updateBuzzer(moistureBand);
+}
+
+void setRingColor(uint8_t red, uint8_t green, uint8_t blue) {
+  for (int i = 0; i < NUM_PIXELS; i++) {
+    pixels.setPixelColor(i, pixels.Color(red, green, blue));
+  }
+
+  pixels.show();
+}
+
+void updateScreen(int moisturePercent, String line1, String line2) {
+  display.clearDisplay();
+
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.println(line1);
+
+  display.setTextSize(1);
+  display.setCursor(0, 24);
+  display.println(line2);
+
+  display.drawLine(0, 36, 128, 36, WHITE);
+
+  display.setTextSize(2);
+  display.setCursor(0, 42);
+  display.print(moisturePercent);
+  display.println("%");
+
+  display.display();
 }
 
 
